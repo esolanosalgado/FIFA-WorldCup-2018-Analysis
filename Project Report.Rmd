@@ -41,7 +41,27 @@ new_appr <- Appearance[Appearance!=0]
 hist(new_appr, breaks = 10, xlab = 'Appearance')
 boxplot(new_appr, horizontal = TRUE, xlab ='Appearance')
 ```
+#####GDP Analysis
+```{r}
+GDP <- pull(WC,5)
+is.na(GDP)
+hist(GDP)
+boxplot(GDP, horizontal = TRUE, na.rm = TRUE)
+summary(GDP, na.rm = TRUE)
+```
+#####Star players Analysis
+```{r}
+star <- pull(WC,9)
+hist(star)
+boxplot(star, horizontal = TRUE)
+summary(star)
 
+#exclude value 0
+new_star <- star[star!=0]
+hist(new_star)
+boxplot(new_star, horizontal = TRUE)
+summary(new_star)
+```
 ### Bivariate Data Analysis
 
 ##### Appearances and Number of Star Players
