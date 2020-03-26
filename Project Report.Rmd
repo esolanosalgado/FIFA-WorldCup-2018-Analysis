@@ -1,0 +1,32 @@
+---
+title: "Project Report"
+author: "Eduardo Solano-Salgado"
+date: "26/03/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Objective
+
+
+## Introduction
+
+
+## Data Source
+
+
+## Analysis and Discussion
+
+
+### Univariate Data Analysis
+
+
+
+### Bivariate Data Analysis
+
+
+## Limitations
+
+
+## Conclusion
