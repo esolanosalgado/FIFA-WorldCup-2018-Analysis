@@ -35,6 +35,11 @@ Appearance<- pull(WC,7)
 
 hist(Appearance, breaks = 5)
 boxplot(Appearance, horizontal=TRUE)
+
+#excluding the value 0
+new_appr <- Appearance[Appearance!=0]
+hist(new_appr, breaks = 10, xlab = 'Appearance')
+boxplot(new_appr, horizontal = TRUE, xlab ='Appearance')
 ```
 
 ### Bivariate Data Analysis
