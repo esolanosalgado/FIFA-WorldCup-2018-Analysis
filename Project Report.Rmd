@@ -21,10 +21,35 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Univariate Data Analysis
 
+```{r}
+library(readxl, logical.return=FALSE)
+library(ggplot2, logical.return=FALSE)
+library(dplyr, warn.conflicts=FALSE)
 
+WC<- read_xlsx('WorldCup.xlsx')
+```
+
+##### World Cup Appearances Analysis
+```{r}
+Appearance<- pull(WC,7)
+
+hist(Appearance, breaks = 5)
+boxplot(Appearance, horizontal=TRUE)
+```
 
 ### Bivariate Data Analysis
 
+##### Appearances and Number of Star Players
+```{r}
+z<- lm(Appearances~Stars,data=WC)
+
+ggplot(WC, aes(Stars, Appearances))+geom_point(size=3, shape=16)+
+  geom_abline(slope=z$coefficients[2], intercept=z$coefficients[1], color='red')
+
+ cor(WC$Stars, WC$Appearances)
+```
+
+##### Gross Domestic Product and Appearances at the World Cup
 
 ## Limitations
 
