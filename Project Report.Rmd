@@ -89,6 +89,34 @@ curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)),
 
 ##### Gross Domestic Product and Appearances at the World Cup
 ```{r}
+m <- lm(GPD~Appearances)
+summary(m)
+
+#take out the missing values
+WC.fitted <- WC %>% filter(!is.na(GPD))
+m.fitted <- lm(GPD~Appearances, data = WC.fitted)
+cor(WC.fitted$Appearances,WC.fitted$GPD)
+summary(m.fitted)
+
+#Scatter plot without missing values
+ggplot(WC.fitted)+
+  aes(WC.fitted$Appearances,WC.fitted$GPD) +
+  geom_point(size = 3, shape = 16) +
+  geom_smooth(method = 'lm', se = F) +
+  ylab('GDP') + xlab('Appearances')
+  
+#regression analysis
+residual1=resid(m.fitted) ## Obtain residuals
+stu.residual1 =studres(m.fitted) ## Obtain Studentized residuals
+plot(WC.fitted$Appearances, stu.residual1 , ylab="Residuals", xlab="Appearances", main="Studentized Residual
+Plot", ylim = c(-2,2))
+abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
+hist(stu.residual1, prob =T, xlim = c(-5,5))
+curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
+```
+##### Appearances and Ranking analysis
+```{r}
 
 ```
 ##### Input the Worldcup data and data change for chisq
