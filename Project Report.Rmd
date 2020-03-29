@@ -26,7 +26,8 @@ library(readxl, logical.return=FALSE)
 library(ggplot2, logical.return=FALSE)
 library(dplyr, warn.conflicts=FALSE)
 
-WC<- read_xlsx('WorldCup.xlsx')
+WC<- read_xlsx('WorldCup_top100.xlsx')
+attach(WC)
 ```
 
 ##### World Cup Appearances Analysis
@@ -66,16 +67,30 @@ summary(new_star)
 
 ##### Appearances and Number of Star Players
 ```{r}
-z<- lm(Appearances~Stars,data=WC)
+z <- lm(Stars~Appearances,data=WC)
+summary(z)
+ggplot(WC)+ 
+  aes(Appearances,Stars) +
+  geom_point(size = 3, shape = 16) +
+  geom_smooth(method = 'lm', se = F)
 
-ggplot(WC, aes(Stars, Appearances))+geom_point(size=3, shape=16)+
-  geom_abline(slope=z$coefficients[2], intercept=z$coefficients[1], color='red')
+cor(Stars, Appearances)
 
- cor(WC$Stars, WC$Appearances)
+#regression analysis
+residual=resid(z) ## Obtain residuals
+stu.residual =studres(z) ## Obtain Studentized residuals
+plot(Appearances, stu.residual , ylab="Residuals", xlab="Stars", main="Studentized Residual
+Plot")
+abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
+hist(stu.residual, prob =T)
+curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
 ```
 
 ##### Gross Domestic Product and Appearances at the World Cup
+```{r}
 
+```
 ##### Input the Worldcup data and data change for chisq
 ```{SAS}
 FILENAME REFFILE '/folders/myfolders/sasuser.v94/WorldCup.xlsx';
