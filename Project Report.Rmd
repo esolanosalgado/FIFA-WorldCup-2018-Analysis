@@ -117,6 +117,49 @@ curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)),
 ```
 ##### Appearances and Ranking analysis
 ```{r}
+a <- lm(Ranking~Appearances,data=WC)
+summary(a)
+ggplot(WC)+ 
+  aes(Appearances,Ranking) +
+  geom_point(size = 3, shape = 16) +
+  geom_smooth(method = 'lm', se = F)
+
+cor(Ranking, Appearances)
+
+#regression analysis
+residual2=resid(a) ## Obtain residuals
+stu.residual2 =studres(a) ## Obtain Studentized residuals
+plot(Ranking, stu.residual2 , ylab="Residuals", xlab="Ranking", main="Studentized Residual
+Plot")
+abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
+hist(stu.residual2, prob =T)
+curve(dnorm(x, mean=mean(stu.residual2), sd=sd(stu.residual2)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
+```
+##### Ranking vs GDP
+```{r}
+#take out the missing values
+WC.fitted <- WC %>% filter(!is.na(GPD))
+m.fitted1 <- lm(GPD~Ranking, data = WC.fitted)
+cor(WC.fitted$Ranking,WC.fitted$GPD)
+summary(m.fitted1)
+
+#Scatter plot without missing values
+ggplot(WC.fitted)+
+  aes(WC.fitted$Ranking,WC.fitted$GPD) +
+  geom_point(size = 3, shape = 16) +
+  geom_smooth(method = 'lm', se = F) +
+  ylab('GDP') + xlab('Ranking')
+
+#regression analysis
+residual3=resid(m.fitted1) ## Obtain residuals
+stu.residual3 =studres(m.fitted1) ## Obtain Studentized residuals
+plot(WC.fitted$Ranking, stu.residual3 , ylab="Residuals", xlab="Ranking", main="Studentized Residual
+Plot", ylim = c(-2,2))
+abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
+hist(stu.residual3, prob =T, xlim = c(-5,5))
+curve(dnorm(x, mean=mean(stu.residual3), sd=sd(stu.residual3)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
 
 ```
 ##### Input the Worldcup data and data change for chisq
