@@ -18,7 +18,24 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Analysis and Discussion
 
+### Input the Worldcup data and data change for chisq for SAS code
+```{SAS}
+FILENAME REFFILE '/folders/myfolders/sasuser.v94/WorldCup.xlsx';
 
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=XLSX
+	OUT=WORLDCUP;
+	GETNAMES=YES;
+RUN;
+
+FILENAME REFFILE '/folders/myfolders/sasuser.v94/Data_for_chi_sqr_test.xlsx';
+
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=XLSX
+	OUT=CHISQ1;
+	GETNAMES=YES;
+RUN;
+```
 ### Univariate Data Analysis
 
 ```{r}
@@ -32,36 +49,96 @@ attach(WC)
 
 ##### World Cup Appearances Analysis
 ```{r}
-Appearance<- pull(WC,7)
-
-hist(Appearance, breaks = 5)
-boxplot(Appearance, horizontal=TRUE)
-
-#excluding the value
-new_appr <- Appearance[Appearance!=0]
-hist(new_appr, breaks = 10, xlab = 'Appearance')
-boxplot(new_appr, horizontal = TRUE, xlab ='Appearance')
+hist(Appearances, breaks = 10)
+boxplot(Appearances, horizontal=TRUE, main = 'Boxplot of Appearances')
+summary(Appearances)
+quantile(Appearances)
 ```
 #####GDP Analysis
 ```{r}
-GDP <- pull(WC,5)
-is.na(GDP)
 hist(GDP)
-boxplot(GDP, horizontal = TRUE, na.rm = TRUE)
+boxplot(GDP, horizontal = TRUE, na.rm = TRUE, main = 'Boxplot of GDP')
 summary(GDP, na.rm = TRUE)
+quantile(GDP, na.rm =TRUE)
 ```
 #####Star players Analysis
 ```{r}
-star <- pull(WC,9)
-hist(star)
-boxplot(star, horizontal = TRUE)
-summary(star)
+hist(Stars)
+boxplot(Stars, horizontal = TRUE, main = 'Boxplot of Star Players')
+summary(Stars)
+quantile(Stars)
+```
+##### Confederation Analysis
+```{SAS}
+PROC FREQ DATA = WORLDCUP;
+	TABLE CONFEDERATION / NOROW NOCOL NOCUM;
+RUN; 
 
-#exclude value 0
-new_star <- star[star!=0]
-hist(new_star)
-boxplot(new_star, horizontal = TRUE)
-summary(new_star)
+PROC SGPLOT DATA = WORLDCUP;
+	VBAR CONFEDERATION;
+	TITLE 'Frequency of Confederation';
+RUN;
+
+PROC TEMPLATE;
+   DEFINE STATGRAPH CONFEDERATION;
+      BEGINGRAPH;
+         LAYOUT REGION;
+            PIECHART CATEGORY = CONFEDERATION /
+            DATALABELLOCATION = OUTSIDE
+            CATEGORYDIRECTION = CLOCKWISE
+            START = 180 NAME = 'pie';
+            DISCRETELEGEND 'pie' /
+            TITLE = 'Confederation';
+         ENDLAYOUT;
+      ENDGRAPH;
+   END;
+RUN;
+
+PROC SGRENDER DATA = WORLDCUP
+            TEMPLATE = CONFEDERATION;
+RUN;
+
+```
+##### Results Analysis
+```{SAS}
+PROC FREQ DATA = WORLDCUP;
+	TABLE RESULT / NOROW NOCOL NOCUM;
+RUN;
+
+PROC SGPLOT DATA = WORLDCUP;
+	VBAR RESULT;
+	TITLE 'Frequency of Result';
+RUN;
+
+PROC TEMPLATE;
+   DEFINE STATGRAPH RESULT;
+      BEGINGRAPH;
+         LAYOUT REGION;
+            PIECHART CATEGORY = RESULT /
+            DATALABELLOCATION = OUTSIDE
+            CATEGORYDIRECTION = CLOCKWISE
+            START = 180 NAME = 'pie';
+            DISCRETELEGEND 'pie' /
+            TITLE = 'Results';
+         ENDLAYOUT;
+      ENDGRAPH;
+   END;
+RUN;
+
+PROC SGRENDER DATA = WORLDCUP
+            TEMPLATE = RESULT;
+RUN;
+```
+##### Wins
+```{SAS}
+PROC FREQ DATA = WORLDCUP;
+	TABLE WINS / NOROW NOCOL NOCUM;
+RUN;
+
+PROC SGPLOT DATA = WORLDCUP;
+	VBAR WINS;
+	TITLE 'Frequency of Win';
+RUN;
 ```
 ### Bivariate Data Analysis
 
@@ -162,24 +239,6 @@ curve(dnorm(x, mean=mean(stu.residual3), sd=sd(stu.residual3)),
       col="darkblue", lwd=2, add=TRUE, yaxt="n")
 
 ```
-##### Input the Worldcup data and data change for chisq
-```{SAS}
-FILENAME REFFILE '/folders/myfolders/sasuser.v94/WorldCup.xlsx';
-
-PROC IMPORT DATAFILE=REFFILE
-	DBMS=XLSX
-	OUT=WORLDCUP;
-	GETNAMES=YES;
-RUN;
-
-FILENAME REFFILE '/folders/myfolders/sasuser.v94/Data_for_chi_sqr_test.xlsx';
-
-PROC IMPORT DATAFILE=REFFILE
-	DBMS=XLSX
-	OUT=CHISQ;
-	GETNAMES=YES;
-RUN;
-```
 ##### Confederation and Result
 ```{SAS}
 /* CHISQ TEST AND BARCHART FOR RESULT AND CONFEDERATION */
@@ -190,7 +249,7 @@ RUN;
 
 
 /* CHANGE THE TABLE IN CHISQ TEST FOR RESULT AND CONFEDERATION*/
-PROC FREQ DATA = CHISQ;
+PROC FREQ DATA = CHISQ1;
 	TABLE RESULT * CONFEDERATION / EXPECTED CHISQ NOROW NOCOL NOPERCENT
 	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
 RUN;
@@ -206,7 +265,7 @@ RUN;
 
 
 /* CHANGE THE TABLE IN CHISQ TEST FOR RESULT AND CONFEDERATION*/
-PROC FREQ DATA = CHISQ;
+PROC FREQ DATA = CHISQ1;
 	TABLE CONFEDERATION * TIER / EXPECTED CHISQ NOROW NOCOL NOPERCENT
 	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
 RUN;
@@ -222,7 +281,7 @@ RUN;
 
 
 /* CHANGE THE TABLE IN CHISQ TEST FOR RESULT AND CONFEDERATION*/
-PROC FREQ DATA = CHISQ;
+PROC FREQ DATA = CHISQ1;
 	TABLE TIER * RESULT / EXPECTED CHISQ NOROW NOCOL NOPERCENT
 	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
 RUN;
