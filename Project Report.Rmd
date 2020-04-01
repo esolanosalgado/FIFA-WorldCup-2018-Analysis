@@ -194,10 +194,10 @@ curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)),
 ```
 ##### Appearances and Ranking analysis
 ```{r}
-a <- lm(Ranking~Appearances,data=WC)
+a <- lm(Appearances ~ Ranking,data=WC)
 summary(a)
 ggplot(WC)+ 
-  aes(Appearances,Ranking) +
+  aes(Ranking,Appearances) +
   geom_point(size = 3, shape = 16) +
   geom_smooth(method = 'lm', se = F)
 
@@ -212,6 +212,7 @@ abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
 hist(stu.residual2, prob =T)
 curve(dnorm(x, mean=mean(stu.residual2), sd=sd(stu.residual2)), 
       col="darkblue", lwd=2, add=TRUE, yaxt="n")
+
 ```
 ##### Ranking vs GDP
 ```{r}
