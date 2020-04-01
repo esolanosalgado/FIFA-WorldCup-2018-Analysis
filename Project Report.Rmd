@@ -166,18 +166,18 @@ curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)),
 
 ##### Gross Domestic Product and Appearances at the World Cup
 ```{r}
-m <- lm(GPD~Appearances)
+m <- lm(GDP~Appearances)
 summary(m)
 
 #take out the missing values
-WC.fitted <- WC %>% filter(!is.na(GPD))
-m.fitted <- lm(GPD~Appearances, data = WC.fitted)
-cor(WC.fitted$Appearances,WC.fitted$GPD)
+WC.fitted <- WC %>% filter(!is.na(GDP))
+m.fitted <- lm(GDP~Appearances, data = WC.fitted)
+cor(WC.fitted$Appearances,WC.fitted$GDP)
 summary(m.fitted)
 
 #Scatter plot without missing values
 ggplot(WC.fitted)+
-  aes(WC.fitted$Appearances,WC.fitted$GPD) +
+  aes(WC.fitted$Appearances,WC.fitted$GDP) +
   geom_point(size = 3, shape = 16) +
   geom_smooth(method = 'lm', se = F) +
   ylab('GDP') + xlab('Appearances')
@@ -217,14 +217,14 @@ curve(dnorm(x, mean=mean(stu.residual2), sd=sd(stu.residual2)),
 ##### Ranking vs GDP
 ```{r}
 #take out the missing values
-WC.fitted <- WC %>% filter(!is.na(GPD))
-m.fitted1 <- lm(GPD~Ranking, data = WC.fitted)
-cor(WC.fitted$Ranking,WC.fitted$GPD)
+WC.fitted <- WC %>% filter(!is.na(GDP))
+m.fitted1 <- lm(GDP~Ranking, data = WC.fitted)
+cor(WC.fitted$Ranking,WC.fitted$GDP)
 summary(m.fitted1)
 
 #Scatter plot without missing values
 ggplot(WC.fitted)+
-  aes(WC.fitted$Ranking,WC.fitted$GPD) +
+  aes(WC.fitted$Ranking,WC.fitted$GDP) +
   geom_point(size = 3, shape = 16) +
   geom_smooth(method = 'lm', se = F) +
   ylab('GDP') + xlab('Ranking')
