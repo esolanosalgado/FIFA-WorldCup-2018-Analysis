@@ -18,7 +18,24 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Analysis and Discussion
 
+### Input the Worldcup data and data change for chisq for SAS code
+```{SAS}
+FILENAME REFFILE '/folders/myfolders/sasuser.v94/WorldCup.xlsx';
 
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=XLSX
+	OUT=WORLDCUP;
+	GETNAMES=YES;
+RUN;
+
+FILENAME REFFILE '/folders/myfolders/sasuser.v94/Data_for_chi_sqr_test.xlsx';
+
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=XLSX
+	OUT=CHISQ1;
+	GETNAMES=YES;
+RUN;
+```
 ### Univariate Data Analysis
 
 ```{r}
@@ -26,35 +43,250 @@ library(readxl, logical.return=FALSE)
 library(ggplot2, logical.return=FALSE)
 library(dplyr, warn.conflicts=FALSE)
 
-WC<- read_xlsx('WorldCup.xlsx')
+WC<- read_xlsx('WorldCup_top100.xlsx')
+attach(WC)
 ```
 
 ##### World Cup Appearances Analysis
 ```{r}
-Appearance<- pull(WC,7)
-
-hist(Appearance, breaks = 5)
-boxplot(Appearance, horizontal=TRUE)
-
-#excluding the value
-new_appr <- Appearance[Appearance!=0]
-hist(new_appr, breaks = 10, xlab = 'Appearance')
-boxplot(new_appr, horizontal = TRUE, xlab ='Appearance')
+hist(Appearances, breaks = 10)
+boxplot(Appearances, horizontal=TRUE, main = 'Boxplot of Appearances')
+summary(Appearances)
+quantile(Appearances)
 ```
+#####GDP Analysis
+```{r}
+hist(GDP)
+boxplot(GDP, horizontal = TRUE, na.rm = TRUE, main = 'Boxplot of GDP')
+summary(GDP, na.rm = TRUE)
+quantile(GDP, na.rm =TRUE)
+```
+#####Star players Analysis
+```{r}
+hist(Stars)
+boxplot(Stars, horizontal = TRUE, main = 'Boxplot of Star Players')
+summary(Stars)
+quantile(Stars)
+```
+##### Confederation Analysis
+```{SAS}
+PROC FREQ DATA = WORLDCUP;
+	TABLE CONFEDERATION / NOROW NOCOL NOCUM;
+RUN; 
 
+PROC SGPLOT DATA = WORLDCUP;
+	VBAR CONFEDERATION;
+	TITLE 'Frequency of Confederation';
+RUN;
+
+PROC TEMPLATE;
+   DEFINE STATGRAPH CONFEDERATION;
+      BEGINGRAPH;
+         LAYOUT REGION;
+            PIECHART CATEGORY = CONFEDERATION /
+            DATALABELLOCATION = OUTSIDE
+            CATEGORYDIRECTION = CLOCKWISE
+            START = 180 NAME = 'pie';
+            DISCRETELEGEND 'pie' /
+            TITLE = 'Confederation';
+         ENDLAYOUT;
+      ENDGRAPH;
+   END;
+RUN;
+
+PROC SGRENDER DATA = WORLDCUP
+            TEMPLATE = CONFEDERATION;
+RUN;
+
+```
+##### Results Analysis
+```{SAS}
+PROC FREQ DATA = WORLDCUP;
+	TABLE RESULT / NOROW NOCOL NOCUM;
+RUN;
+
+PROC SGPLOT DATA = WORLDCUP;
+	VBAR RESULT;
+	TITLE 'Frequency of Result';
+RUN;
+
+PROC TEMPLATE;
+   DEFINE STATGRAPH RESULT;
+      BEGINGRAPH;
+         LAYOUT REGION;
+            PIECHART CATEGORY = RESULT /
+            DATALABELLOCATION = OUTSIDE
+            CATEGORYDIRECTION = CLOCKWISE
+            START = 180 NAME = 'pie';
+            DISCRETELEGEND 'pie' /
+            TITLE = 'Results';
+         ENDLAYOUT;
+      ENDGRAPH;
+   END;
+RUN;
+
+PROC SGRENDER DATA = WORLDCUP
+            TEMPLATE = RESULT;
+RUN;
+```
+##### Wins
+```{SAS}
+PROC FREQ DATA = WORLDCUP;
+	TABLE WINS / NOROW NOCOL NOCUM;
+RUN;
+
+PROC SGPLOT DATA = WORLDCUP;
+	VBAR WINS;
+	TITLE 'Frequency of Win';
+RUN;
+```
 ### Bivariate Data Analysis
 
 ##### Appearances and Number of Star Players
 ```{r}
-z<- lm(Appearances~Stars,data=WC)
+z <- lm(Stars~Appearances,data=WC)
+summary(z)
+ggplot(WC)+ 
+  aes(Appearances,Stars) +
+  geom_point(size = 3, shape = 16) +
+  geom_smooth(method = 'lm', se = F)
 
-ggplot(WC, aes(Stars, Appearances))+geom_point(size=3, shape=16)+
-  geom_abline(slope=z$coefficients[2], intercept=z$coefficients[1], color='red')
+cor(Stars, Appearances)
 
- cor(WC$Stars, WC$Appearances)
+#regression analysis
+residual=resid(z) ## Obtain residuals
+stu.residual =studres(z) ## Obtain Studentized residuals
+plot(Appearances, stu.residual , ylab="Residuals", xlab="Stars", main="Studentized Residual
+Plot")
+abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
+hist(stu.residual, prob =T)
+curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
 ```
 
 ##### Gross Domestic Product and Appearances at the World Cup
+```{r}
+m <- lm(GPD~Appearances)
+summary(m)
+
+#take out the missing values
+WC.fitted <- WC %>% filter(!is.na(GPD))
+m.fitted <- lm(GPD~Appearances, data = WC.fitted)
+cor(WC.fitted$Appearances,WC.fitted$GPD)
+summary(m.fitted)
+
+#Scatter plot without missing values
+ggplot(WC.fitted)+
+  aes(WC.fitted$Appearances,WC.fitted$GPD) +
+  geom_point(size = 3, shape = 16) +
+  geom_smooth(method = 'lm', se = F) +
+  ylab('GDP') + xlab('Appearances')
+  
+#regression analysis
+residual1=resid(m.fitted) ## Obtain residuals
+stu.residual1 =studres(m.fitted) ## Obtain Studentized residuals
+plot(WC.fitted$Appearances, stu.residual1 , ylab="Residuals", xlab="Appearances", main="Studentized Residual
+Plot", ylim = c(-2,2))
+abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
+hist(stu.residual1, prob =T, xlim = c(-5,5))
+curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
+```
+##### Appearances and Ranking analysis
+```{r}
+a <- lm(Appearances ~ Ranking,data=WC)
+summary(a)
+ggplot(WC)+ 
+  aes(Ranking,Appearances) +
+  geom_point(size = 3, shape = 16) +
+  geom_smooth(method = 'lm', se = F)
+
+cor(Ranking, Appearances)
+
+#regression analysis
+residual2=resid(a) ## Obtain residuals
+stu.residual2 =studres(a) ## Obtain Studentized residuals
+plot(Ranking, stu.residual2 , ylab="Residuals", xlab="Ranking", main="Studentized Residual
+Plot")
+abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
+hist(stu.residual2, prob =T)
+curve(dnorm(x, mean=mean(stu.residual2), sd=sd(stu.residual2)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
+
+```
+##### Ranking vs GDP
+```{r}
+#take out the missing values
+WC.fitted <- WC %>% filter(!is.na(GPD))
+m.fitted1 <- lm(GPD~Ranking, data = WC.fitted)
+cor(WC.fitted$Ranking,WC.fitted$GPD)
+summary(m.fitted1)
+
+#Scatter plot without missing values
+ggplot(WC.fitted)+
+  aes(WC.fitted$Ranking,WC.fitted$GPD) +
+  geom_point(size = 3, shape = 16) +
+  geom_smooth(method = 'lm', se = F) +
+  ylab('GDP') + xlab('Ranking')
+
+#regression analysis
+residual3=resid(m.fitted1) ## Obtain residuals
+stu.residual3 =studres(m.fitted1) ## Obtain Studentized residuals
+plot(WC.fitted$Ranking, stu.residual3 , ylab="Residuals", xlab="Ranking", main="Studentized Residual
+Plot", ylim = c(-2,2))
+abline(h=c(-2,0,2), col=c("red", "blue", "red"), lty=c(2,1,2), lwd=c(3,2,3))
+hist(stu.residual3, prob =T, xlim = c(-5,5))
+curve(dnorm(x, mean=mean(stu.residual3), sd=sd(stu.residual3)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
+
+```
+##### Confederation and Result
+```{SAS}
+/* CHISQ TEST AND BARCHART FOR RESULT AND CONFEDERATION */
+PROC FREQ DATA = WORLDCUP;
+	TABLE RESULT * CONFEDERATION /  EXPECTED CHISQ NOROW NOCOL NOPERCENT
+	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
+RUN;
+
+
+/* CHANGE THE TABLE IN CHISQ TEST FOR RESULT AND CONFEDERATION*/
+PROC FREQ DATA = CHISQ1;
+	TABLE RESULT * CONFEDERATION / EXPECTED CHISQ NOROW NOCOL NOPERCENT
+	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
+RUN;
+```
+
+##### Conferation and Tier
+```{SAS}
+/* CHISQ TEST AND BARCHART FOR RESULT AND CONFEDERATION */
+PROC FREQ DATA = WORLDCUP;
+	TABLE CONFEDERATION * TIER /  EXPECTED CHISQ NOROW NOCOL NOPERCENT
+	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
+RUN;
+
+
+/* CHANGE THE TABLE IN CHISQ TEST FOR RESULT AND CONFEDERATION*/
+PROC FREQ DATA = CHISQ1;
+	TABLE CONFEDERATION * TIER / EXPECTED CHISQ NOROW NOCOL NOPERCENT
+	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
+RUN;
+```
+
+##### Result and Tier
+```{SAS}
+/* CHISQ TEST AND BARCHART FOR RESULT AND CONFEDERATION */
+PROC FREQ DATA = WORLDCUP;
+	TABLE TIER * RESULT /  EXPECTED CHISQ NOROW NOCOL NOPERCENT
+	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
+RUN;
+
+
+/* CHANGE THE TABLE IN CHISQ TEST FOR RESULT AND CONFEDERATION*/
+PROC FREQ DATA = CHISQ1;
+	TABLE TIER * RESULT / EXPECTED CHISQ NOROW NOCOL NOPERCENT
+	PLOTS = FREQPLOT(TWOWAY = CLUSTER SCALE = PERCENT);
+RUN;
+```
 
 ## Limitations
 
