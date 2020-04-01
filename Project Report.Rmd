@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Input the Worldcup data and data change for chisq for SAS code
 ```{SAS}
-FILENAME REFFILE '/folders/myfolders/sasuser.v94/WorldCup.xlsx';
+FILENAME REFFILE '/folders/myfolders/sasuser.v94/top100rank.xlsx';
 
 PROC IMPORT DATAFILE=REFFILE
 	DBMS=XLSX
@@ -28,7 +28,7 @@ PROC IMPORT DATAFILE=REFFILE
 	GETNAMES=YES;
 RUN;
 
-FILENAME REFFILE '/folders/myfolders/sasuser.v94/Data_for_chi_sqr_test.xlsx';
+FILENAME REFFILE '/folders/myfolders/sasuser.v94/Data_for_chi_sqr_test_top100.xlsx';
 
 PROC IMPORT DATAFILE=REFFILE
 	DBMS=XLSX
@@ -43,7 +43,7 @@ library(readxl, logical.return=FALSE)
 library(ggplot2, logical.return=FALSE)
 library(dplyr, warn.conflicts=FALSE)
 
-WC<- read_xlsx('WorldCup_top100.xlsx')
+WC<- read_xlsx('top100rank.xlsx')
 attach(WC)
 ```
 
@@ -166,18 +166,18 @@ curve(dnorm(x, mean=mean(stu.residual), sd=sd(stu.residual)),
 
 ##### Gross Domestic Product and Appearances at the World Cup
 ```{r}
-m <- lm(GPD~Appearances)
+m <- lm(GDP~Appearances)
 summary(m)
 
 #take out the missing values
-WC.fitted <- WC %>% filter(!is.na(GPD))
-m.fitted <- lm(GPD~Appearances, data = WC.fitted)
-cor(WC.fitted$Appearances,WC.fitted$GPD)
+WC.fitted <- WC %>% filter(!is.na(GDP))
+m.fitted <- lm(GDP~Appearances, data = WC.fitted)
+cor(WC.fitted$Appearances,WC.fitted$GDP)
 summary(m.fitted)
 
 #Scatter plot without missing values
 ggplot(WC.fitted)+
-  aes(WC.fitted$Appearances,WC.fitted$GPD) +
+  aes(WC.fitted$Appearances,WC.fitted$GDP) +
   geom_point(size = 3, shape = 16) +
   geom_smooth(method = 'lm', se = F) +
   ylab('GDP') + xlab('Appearances')
@@ -217,14 +217,14 @@ curve(dnorm(x, mean=mean(stu.residual2), sd=sd(stu.residual2)),
 ##### Ranking vs GDP
 ```{r}
 #take out the missing values
-WC.fitted <- WC %>% filter(!is.na(GPD))
-m.fitted1 <- lm(GPD~Ranking, data = WC.fitted)
-cor(WC.fitted$Ranking,WC.fitted$GPD)
+WC.fitted <- WC %>% filter(!is.na(GDP))
+m.fitted1 <- lm(GDP~Ranking, data = WC.fitted)
+cor(WC.fitted$Ranking,WC.fitted$GDP)
 summary(m.fitted1)
 
 #Scatter plot without missing values
 ggplot(WC.fitted)+
-  aes(WC.fitted$Ranking,WC.fitted$GPD) +
+  aes(WC.fitted$Ranking,WC.fitted$GDP) +
   geom_point(size = 3, shape = 16) +
   geom_smooth(method = 'lm', se = F) +
   ylab('GDP') + xlab('Ranking')
