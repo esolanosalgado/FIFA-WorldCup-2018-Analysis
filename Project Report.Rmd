@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Input the Worldcup data and data change for chisq for SAS code
 ```{SAS}
-FILENAME REFFILE '/folders/myfolders/sasuser.v94/WorldCup.xlsx';
+FILENAME REFFILE '/folders/myfolders/sasuser.v94/top100rank.xlsx';
 
 PROC IMPORT DATAFILE=REFFILE
 	DBMS=XLSX
@@ -28,7 +28,7 @@ PROC IMPORT DATAFILE=REFFILE
 	GETNAMES=YES;
 RUN;
 
-FILENAME REFFILE '/folders/myfolders/sasuser.v94/Data_for_chi_sqr_test.xlsx';
+FILENAME REFFILE '/folders/myfolders/sasuser.v94/Data_for_chi_sqr_test_top100.xlsx';
 
 PROC IMPORT DATAFILE=REFFILE
 	DBMS=XLSX
@@ -43,7 +43,7 @@ library(readxl, logical.return=FALSE)
 library(ggplot2, logical.return=FALSE)
 library(dplyr, warn.conflicts=FALSE)
 
-WC<- read_xlsx('WorldCup_top100.xlsx')
+WC<- read_xlsx('top100rank.xlsx')
 attach(WC)
 ```
 
